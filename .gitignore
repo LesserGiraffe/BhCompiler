@@ -1,0 +1,12 @@
+.gradle
+.settings
+.checkstyle
+.classpath
+.project
+.vscode
+.idea
+/build
+/bin
+/App
+/BhCompiler.iml
+/out

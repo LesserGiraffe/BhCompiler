@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,9 +66,8 @@ class SymbolNames {
    *
    * @param extensionFilePaths コンパイラの拡張要素を記述したファイルのパスのリスト
    */
-  SymbolNames(SequencedCollection<String> extensionFilePaths) throws CompileError {
-    SequencedCollection<Path> filePaths = extensionFilePaths.stream().map(Paths::get).toList();
-    for (Path filePath : filePaths) {
+  SymbolNames(SequencedCollection<Path> extensionFilePaths) throws CompileError {
+    for (Path filePath : extensionFilePaths) {
       readExtensions(filePath).forEach(this::registerExtension);
     }
   }

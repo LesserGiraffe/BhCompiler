@@ -21,12 +21,10 @@ import static net.seapanda.bunnyhop.compiler.Keywords.Prefix;
 import static net.seapanda.bunnyhop.compiler.Keywords.newLine;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,6 +49,7 @@ public class CodeGenerator implements BhCompiler {
 
   @Override
   public Path compile(SourceSet sourceSet, CompileOption option) throws CompileError {
+    createDestDir(option);
     StringBuilder code = new StringBuilder();
     try (BufferedWriter writer = Files.newBufferedWriter(
         option.outFile,
@@ -63,7 +62,6 @@ public class CodeGenerator implements BhCompiler {
       Preprocessor.process(symbols, sourceSet.getInstanceIdToNode());
       generateLibCode(option.libPaths, code);
       generateCode(codeGens, sourceSet, code, option);
-      new File(option.outFile.getParent().toAbsolutePath().toString()).mkdirs();
       writer.write(code.toString());
     } catch (Exception e) {
       throw new CompileError("Failed to compile", e);
@@ -71,10 +69,22 @@ public class CodeGenerator implements BhCompiler {
     return option.outFile;
   }
 
-  private void generateLibCode(SequencedCollection<String> libPaths, StringBuilder code)
+  /** プログラムファイルを置くディレクトリを作成する. */
+  private static void createDestDir(CompileOption option) throws CompileError {
+    try {
+      Path outDir = option.outFile.toAbsolutePath().getParent();
+      if (outDir != null) {
+        Files.createDirectories(outDir);
+      }
+    } catch (IOException e) {
+      throw new CompileError("Failed to create the output directory", e);
+    }
+  }
+
+  private void generateLibCode(SequencedCollection<Path> libPaths, StringBuilder code)
       throws IOException {
-    for (String libPath : libPaths) {
-      code.append(Files.readString(Paths.get(libPath), StandardCharsets.UTF_8))
+    for (Path libPath : libPaths) {
+      code.append(Files.readString(libPath, StandardCharsets.UTF_8))
           .append(newLine);
     }
   }
